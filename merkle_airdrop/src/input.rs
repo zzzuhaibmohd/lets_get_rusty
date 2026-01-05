@@ -3,7 +3,8 @@ use std::fs;
 
 use crate::types::UserRecord;
 
-pub fn read_users_from_csv(path: &str) -> Result<Vec<UserRecord>, Box<dyn Error>> { //@note -> Box<dyn Error> is used to handle most common error types
+pub fn read_users_from_csv(path: &str) -> Result<Vec<UserRecord>, Box<dyn Error>> {
+    //@note -> Box<dyn Error> is used to handle most common error types
     let contents = fs::read_to_string(path)?;
 
     let mut users = Vec::new();
