@@ -21,3 +21,14 @@ pub struct MerkleLeaf {
 pub struct MerkleTree {
     pub levels: Vec<Vec<Vec<u8>>>,
 }
+
+#[derive(Debug, Clone)]
+pub enum Direction {
+    Left,
+    Right,
+}
+
+#[derive(Debug, Clone)]
+pub struct MerkleProof {
+    pub siblings: Vec<(Vec<u8>, Direction)>,
+}

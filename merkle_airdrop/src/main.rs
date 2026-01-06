@@ -5,8 +5,10 @@ mod types;
 
 use eligibility::filter_eligible_users; //@note -> use th imported function from the imported module
 use input::read_users_from_csv;
-use merkle::{build_merkle_tree, create_merkle_tree, merkle_root};
-use types::{EligibleUser, MerkleLeaf, UserRecord};
+use merkle::{
+    build_merkle_tree, create_merkle_tree, find_leaf_index, generate_proof, merkle_root,
+    verify_proof,
+};
 
 fn main() {
     let users = read_users_from_csv("data/users.csv").expect("Failed to read users");
@@ -18,4 +20,16 @@ fn main() {
     let tree = build_merkle_tree(&leaves);
 
     let root = merkle_root(&tree);
+
+    let target = &leaves[0];
+    let index = find_leaf_index(&leaves, &target.address, target.amount);
+
+    let proof = generate_proof(&tree, index.unwrap());
+
+    let is_valid = verify_proof(&target.hash, &proof, &root);
+
+    println!(
+        "User: {} Amount: {} Is valid: {}",
+        target.address, target.amount, is_valid
+    );
 }

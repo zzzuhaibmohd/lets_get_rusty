@@ -1,6 +1,6 @@
 use sha2::{Digest, Sha256};
 
-use crate::types::{EligibleUser, MerkleLeaf, MerkleTree, UserRecord};
+use crate::types::{Direction, EligibleUser, MerkleLeaf, MerkleProof, MerkleTree, UserRecord};
 
 fn hash_bytes(data: &[u8]) -> Vec<u8> {
     let mut hasher = Sha256::new();
@@ -72,4 +72,56 @@ pub fn build_merkle_tree(leaves: &[MerkleLeaf]) -> MerkleTree {
 
 pub fn merkle_root(tree: &MerkleTree) -> Vec<u8> {
     tree.levels.last().expect("Tree has no levels")[0].clone()
+}
+
+pub fn generate_proof(tree: &MerkleTree, leaf_index: usize) -> MerkleProof {
+    let mut index = leaf_index;
+    let mut siblings = Vec::new();
+
+    for level in &tree.levels {
+        if level.len() == 1 {
+            break;
+        }
+
+        let is_right = index % 2 == 1;
+        let sibling_index = if is_right { index - 1 } else { index + 1 };
+
+        let sibling_hash = if sibling_index < level.len() {
+            level[sibling_index].clone()
+        } else {
+            // odd node duplicated
+            level[index].clone()
+        };
+
+        let direction = if is_right {
+            Direction::Left
+        } else {
+            Direction::Right
+        };
+
+        siblings.push((sibling_hash, direction));
+
+        index /= 2;
+    }
+
+    MerkleProof { siblings }
+}
+
+pub fn find_leaf_index(leaves: &[MerkleLeaf], address: &str, amount: u64) -> Option<usize> {
+    leaves
+        .iter()
+        .position(|l| l.address == address && l.amount == amount)
+}
+
+pub fn verify_proof(leaf_hash: &[u8], proof: &MerkleProof, expected_root: &[u8]) -> bool {
+    let mut current_hash = leaf_hash.to_vec();
+
+    for (sibling_hash, direction) in &proof.siblings {
+        current_hash = match direction {
+            Direction::Left => hash_pair(sibling_hash, &current_hash),
+            Direction::Right => hash_pair(&current_hash, sibling_hash),
+        };
+    }
+
+    current_hash == expected_root
 }
