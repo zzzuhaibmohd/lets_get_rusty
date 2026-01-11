@@ -74,6 +74,7 @@ fn get_last_challenge_or_exit(path: &str) -> Challenge {
     }
 }
 
+#[cfg(not(tarpaulin_include))]
 fn main() {
     let cli = Cli::parse();
 
