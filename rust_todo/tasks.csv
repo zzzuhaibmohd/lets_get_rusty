@@ -1,0 +1,5 @@
+task_name,task_description,task_complete
+Buy groceries,"Get milk, eggs, bread, and vegetables from the store",false
+Complete project documentation,Write README and update code comments,false
+Review pull requests,Check and review 3 pending pull requests from team,false
+Call dentist,Schedule annual checkup appointment,true
